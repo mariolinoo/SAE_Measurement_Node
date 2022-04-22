@@ -11,7 +11,8 @@ CONFIG -= app_bundle
 SOURCES += \
         echoclient.cpp \
         echoserver.cpp \
-        main.cpp
+        main.cpp \
+        measurementnode.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -19,5 +20,9 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    constants.h \
     echoclient.h \
-    echoserver.h
+    echoserver.h \
+    measurementnode.h \
+    protocol.h \
+    logging.h

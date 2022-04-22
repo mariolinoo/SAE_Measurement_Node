@@ -1,23 +1,41 @@
 /**
- * UDP echo application.
+ * UDP echo application/ Measurement node for SAE project.
+ *
+ * @ UDP echo application:
  * Client sends echo packet to server which sends it back to the client.
  * Time measurement functionality in client to calculate round trip time.
+ *
+ * @ Measurement node for SAE project:
+ * TODO
  */
 #include <QCoreApplication>
 #include <QCommandLineParser>
 #include <QCommandLineOption>
 
+// If this build flag is set the UDP echo application is built
+//#define BUILD_ROUND_TRIP_MEAS_APP
+
+#ifdef BUILD_ROUND_TRIP_MEAS_APP
+
 #include "echoclient.h"
 #include "echoserver.h"
+
+#else // !BUILD_ROUND_TRIP_MEAS_APP
+
+#include "measurementnode.h"
+
+#endif // BUILD_ROUND_TRIP_MEAS_APP
 
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
     QCommandLineParser lParser;
-    lParser.setApplicationDescription("UDP echo application");
     const QCommandLineOption lcHelpOption = lParser.addHelpOption();
     const QCommandLineOption lcVersionOption = lParser.addVersionOption();
+
+    #ifdef BUILD_ROUND_TRIP_MEAS_APP
+    lParser.setApplicationDescription("UDP echo application");
 
     const QCommandLineOption lcClientApplicationOption(QStringList() << "c" << "client",
             "Run the client application.");
@@ -110,6 +128,68 @@ int main(int argc, char *argv[])
             lServer->setClientPort(lRemotePort);
         }
     }
+
+#else  // !BUILD_ROUND_TRIP_MEAS_APP
+
+    lParser.setApplicationDescription("Measurement node for SAE project");
+
+    const QCommandLineOption lcPortOption(QStringList() << "p" << "port",
+            "The UDP port to use for this measurement node.", "port");
+    lParser.addOption(lcPortOption);
+
+    const QCommandLineOption lcMasterAddressOption(QStringList() << "m" << "master",
+            "The ip address of the master node.", "ip");
+    lParser.addOption(lcMasterAddressOption);
+
+    const QCommandLineOption lcMasterPortOption(QStringList() << "r" << "remote-port",
+            "The remote port of the master node.", "port");
+    lParser.addOption(lcMasterPortOption);
+
+    if (!lParser.parse(QCoreApplication::arguments())) {
+        lParser.showHelp();
+        return -1;
+    }
+
+    if (lParser.isSet(lcHelpOption)) {
+        lParser.showHelp();
+        return 0;
+    }
+    if (lParser.isSet(lcVersionOption)) {
+        lParser.showVersion();
+        return 0;
+    }
+
+
+    quint16 lPort = 0, lRemotePort = 0;
+    QString lAddress;
+    bool lPortValid = false, lRemotePortValid = false, lAddressValid = false;
+    if (lParser.isSet(lcMasterAddressOption)) {
+        lAddress = lParser.value(lcMasterAddressOption);
+        lAddressValid = true;
+    }
+    if (lParser.isSet(lcPortOption)) {
+        lPort = static_cast<quint16>(lParser.value(lcPortOption).toUInt(&lPortValid));
+    }
+    if (lParser.isSet(lcMasterPortOption)) {
+        lRemotePort = static_cast<quint16>(lParser.value(lcMasterPortOption).toUInt(&lRemotePortValid));
+    }
+
+    QScopedPointer<QObject> lObject;
+    MeasurementNode *node = new MeasurementNode();
+    lObject.reset(node);
+
+    if (lPortValid) {
+        node->setClientPort(lPort);
+    }
+    if (lAddressValid) {
+        node->setMasterNodeAddress(lAddress);
+    }
+    if (lRemotePortValid) {
+        node->setMasterNodePort(lRemotePort);
+    }
+
+#endif // BUILD_ROUND_TRIP_MEAS_APP
+
     QMetaObject::invokeMethod(lObject.data(), "start", Qt::QueuedConnection);
 
     return a.exec();
