@@ -1,6 +1,6 @@
 #include<time.h>
 
-class time{
+class TimeMeasurement {
     private:
         //CPU time
         struct timespec cpu_time;
@@ -23,7 +23,7 @@ class time{
         void timesync_master(unsigned int time_master);
 
         //Calculates time delay on bus 
-        void timesync_communication();
+        void timesync_communication(unsigned int measured_delay);
 
         //Measurment 
         unsigned int measurement();

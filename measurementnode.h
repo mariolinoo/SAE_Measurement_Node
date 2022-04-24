@@ -8,6 +8,7 @@
 #include "protocol.h"
 
 class QUdpSocket;
+class TimeMeasurement;
 
 class MeasurementNode : public QObject
 {
@@ -52,6 +53,8 @@ private:
 
     QHostAddress mMasterNodeAddress;
     quint16 mMasterNodePort;
+
+    QScopedPointer<TimeMeasurement> mTimeMeasurement;
 };
 
 #endif // MEASUREMENTNODE_H
