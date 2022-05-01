@@ -13,7 +13,9 @@
 #include <QCommandLineOption>
 
 // If this build flag is set the UDP echo application is built
-//#define BUILD_ROUND_TRIP_MEAS_APP
+// deprecated: use the dedicated project sae_measurement_node
+// (sae_measurement_node.pro) for it.
+#define BUILD_ROUND_TRIP_MEAS_APP
 
 #ifdef BUILD_ROUND_TRIP_MEAS_APP
 
@@ -61,6 +63,14 @@ int main(int argc, char *argv[])
             "Maximum number of UDP packets to send.", "max_packets");
     lParser.addOption(lcMaxNumPacketsToSendOption);
 
+    const QCommandLineOption lcClientNoWaitForResponseOption(QStringList() << "w" << "no-wait",
+            "Don't wait in the client application for a response of the previous sent echo request.");
+    lParser.addOption(lcClientNoWaitForResponseOption);
+
+    const QCommandLineOption lcSetCounterStartValueOption(QStringList() << "s" << "counter-start",
+            "Set the start value of the counter to send in the echo request.", "counter_value");
+    lParser.addOption(lcSetCounterStartValueOption);
+
     if (!lParser.parse(QCoreApplication::arguments())) {
         lParser.showHelp();
         return -1;
@@ -77,7 +87,9 @@ int main(int argc, char *argv[])
 
     quint16 lPort = 0, lRemotePort = 0;
     QString lAddress;
-    bool lPortValid = false, lRemotePortValid = false, lAddressValid = false;
+    bool lPortValid = false, lRemotePortValid = false, lAddressValid = false,
+            lDontWaitForResponse = false;
+    quint32 lCounter = 0;
     if (lParser.isSet(lcAddressOption)) {
         lAddress = lParser.value(lcAddressOption);
         lAddressValid = true;
@@ -87,6 +99,17 @@ int main(int argc, char *argv[])
     }
     if (lParser.isSet(lcRemotePortOption)) {
         lRemotePort = static_cast<quint16>(lParser.value(lcRemotePortOption).toUInt(&lRemotePortValid));
+    }
+    if (lParser.isSet(lcClientNoWaitForResponseOption)) {
+        lDontWaitForResponse = true;
+    }
+    if (lParser.isSet(lcSetCounterStartValueOption)) {
+        bool lValid;
+        lCounter = static_cast<quint32>(lParser.value(lcSetCounterStartValueOption).toUInt(&lValid));
+        if (!lValid) {
+            qDebug() << "Invalid counter value given. Using 0 as default.";
+            lCounter = 0;
+        }
     }
 
     int lTimerIntervalMs = 3000;
@@ -114,6 +137,8 @@ int main(int argc, char *argv[])
         }
         lClient->setTimerInterval(lTimerIntervalMs);
         lClient->setMaxNumPackets(lMaxNumPackets);
+        lClient->setWaitForServerResponse(!lDontWaitForResponse);
+        lClient->setCountValue(lCounter);
     } else {
         qDebug() << "Starting Server application";
         EchoServer *lServer = new EchoServer();

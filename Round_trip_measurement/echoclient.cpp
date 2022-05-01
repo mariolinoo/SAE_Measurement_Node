@@ -28,6 +28,7 @@ EchoClient::EchoClient(QObject *parent)
       mCounter(0),
       mSendReceiveBuffer(),
       mMaxNumPackets(50000),
+      mWaitForServerResponse(true),
       mStart(nullptr),
       mStop(nullptr),
       mDurations(),
@@ -74,7 +75,7 @@ void EchoClient::sendUdpEchoDatagram() {
     qDebug() << "EchoClient::sendUdpEchoDatagram";
 #endif // ENABLE_DEBUG_PRINTING
 
-    if (!mStart.isNull()) {
+    if (mWaitForServerResponse && !mStart.isNull()) {
       // still waiting on answer, skipping this timer
       qDebug() << "Waiting on server response, skipping this timer.";
       return;

@@ -36,6 +36,9 @@ void MeasurementNode::start() {
 
 void MeasurementNode::readPendingDatagrams() {
     unsigned int ts_time_master = 0;
+    quint32 ts = 0, ts_sec = 0, ts_usec = 0;
+
+    mSendReceiveBuffer[DEFAULT_DATAGRAM_MAX_SIZE-1] = 1; // only for testing, remove it in production
 
     while ( mLocalSocket->hasPendingDatagrams()) {
         const qint64 lcRet = mLocalSocket->readDatagram(mSendReceiveBuffer.data(), DEFAULT_DATAGRAM_MAX_SIZE);
@@ -52,9 +55,16 @@ void MeasurementNode::readPendingDatagrams() {
             switch (static_cast<int>(mSendReceiveBuffer.at(DEFAULT_DATAGRAM_MAX_SIZE-1))) {
                 case MasterToSlaveMessage::SYNC_TIME:
                     DEBUG_PRINT("TimeSync message received");
-                    // TODO update the timestamp
-                    // Not yet clear how a timestamp sent by the master looks like
-                    // e.g. 1 byte will be most likely not enough for the timestamp
+                    // get the timestamp received via network packet,
+                    // it is assumed that timestamp is a 32 bit signed integer
+                    ts = qFromBigEndian<quint32>(mSendReceiveBuffer.data());
+
+                    // decode the timestamp containing seconds and microseconds
+                    // e.g. as returned by get time of day
+                    ts_sec  = ts / 1000000;
+                    ts_usec = ts % 1000000;
+
+                    DEBUG_PRINT("Received the timestamp: " << ts << " (sec=" << ts_sec << ", usec=" << ts_usec << ")");
 
                     // TODO get the timestamp from the UDP datagram and put it int ts_time_master
                     mTimeMeasurement->timesync_master(ts_time_master);

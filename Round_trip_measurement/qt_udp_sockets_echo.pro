@@ -12,7 +12,8 @@ SOURCES += \
         echoclient.cpp \
         echoserver.cpp \
         main.cpp \
-        measurementnode.cpp
+        ../measurementnode.cpp \
+        ../time_measurement.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -20,9 +21,10 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    constants.h \
+    ../constants.h \
     echoclient.h \
     echoserver.h \
-    measurementnode.h \
-    protocol.h \
-    logging.h
+    ../measurementnode.h \
+    ../time_measurement.h \
+    ../protocol.h \
+    ../logging.h

@@ -39,6 +39,14 @@ public:
 
     void setMaxNumPackets(unsigned int pMaxNumPackets);
 
+    void setWaitForServerResponse(bool pWaitForResponse) {
+        mWaitForServerResponse = pWaitForResponse;
+    }
+
+    void setCountValue(quint32 pCounter) {
+        mCounter = pCounter;
+    }
+
 public slots:
     void start();
 
@@ -62,6 +70,7 @@ private:
     QByteArray mSendReceiveBuffer;
 
     unsigned int mMaxNumPackets;
+    bool mWaitForServerResponse;
 
     QScopedPointer<SteadyClockTimePointWrapper> mStart;
     QScopedPointer<SteadyClockTimePointWrapper> mStop;
