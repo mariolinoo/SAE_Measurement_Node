@@ -21,3 +21,15 @@ For testing the sae_measurement_node application the qt_udp_sockets_echo applica
 - Using -c the client is selected
 - With -w it is not waited for answers of the udp echo server (we don't have in this case)
 - The -s option configures the inital value of the counter (100000000 == 100 * 10**6, e.g. start with 100 sec).
+
+## Install RPi dependencies
+```
+sudo apt-get update && sudo apt-get upgrade
+sudo apt install qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools
+```
+
+- Optional dependencies/ tools
+```
+sudo apt-get install qtcreator
+sudo apt install stress netcat
+```
