@@ -9,18 +9,13 @@
 MeasurementNode::MeasurementNode(QObject *parent)
     : QObject{parent},
       mLocalSocket(nullptr),
-      mRemoteSocket(nullptr),
       mClientPort(MEASUREMENT_NODE_PORT),
       mMasterNodeAddress(QHostAddress(MASTER_NODE_IP)),
       mMasterNodePort(MASTER_NODE_PORT)
 {
     mLocalSocket.reset(new QUdpSocket(this));
-    mRemoteSocket.reset(new QUdpSocket(this));
 
     mSendReceiveBuffer.resize(DEFAULT_DATAGRAM_MAX_SIZE);
-
-    mMasterDatagram.reset(new QNetworkDatagram(mSendReceiveBuffer, mMasterNodeAddress, mMasterNodePort));
-    mMasterDatagram->setSender(QHostAddress(MEASUREMENT_NODE_IP), MEASUREMENT_NODE_PORT);
 
 //    mTimeMeasurement.reset(new TimeMeasurement());
 }
@@ -35,13 +30,10 @@ void MeasurementNode::start() {
     const bool lcClientSocketBindSuccessful = mLocalSocket->bind(QHostAddress::Any, mClientPort);
     Q_ASSERT(lcClientSocketBindSuccessful);
     connect(mLocalSocket.data(), &QUdpSocket::readyRead, this, &MeasurementNode::readPendingDatagrams);
-    // not working with QUdpSocket which is not bound to a HostAddress:Port
-//    connect(mRemoteSocket.data(), &QUdpSocket::readyRead, this, &MeasurementNode::readPendingDatagrams);
 
     // finally say hello to the master
     mSendReceiveBuffer[0] = SlaveToMasterMessage::SlaveToMasterMessage::HELLO_MSG;
-//    mRemoteSocket->writeDatagram(mSendReceiveBuffer.data(), mSendReceiveBuffer.size(), mMasterNodeAddress, mMasterNodePort);
-    sendToMasterNode();
+    mLocalSocket->writeDatagram(mSendReceiveBuffer.data(), mSendReceiveBuffer.size(), mMasterNodeAddress, mMasterNodePort);
 }
 
 void MeasurementNode::readPendingDatagrams() {
@@ -74,8 +66,7 @@ void MeasurementNode::readPendingDatagrams() {
 
             // dispatch the protocol
             // Note: beware of network byte order (big endian) where first byte is at the last index
-            // TODO seems to be in first byte from C application (master), but maybe because it only sends 1 byte --> check received length
-            switch (static_cast<int>(mSendReceiveBuffer.at(0))) {
+            switch (static_cast<int>(mSendReceiveBuffer.at(lcPendingDatagramSize-1))) {
                 case MasterToSlaveMessage::START_ROUNDTRIP_MEAS:
                     DEBUG_PRINT("Start roundtrip measurement message received");
 #if 0
@@ -96,8 +87,8 @@ void MeasurementNode::readPendingDatagrams() {
                     // send ack back
                     mSendReceiveBuffer.fill(0, DEFAULT_DATAGRAM_MAX_SIZE);
                     mSendReceiveBuffer[0] = SlaveToMasterMessage::SlaveToMasterMessage::ACK_ROUNDTRIP;
-//                    mRemoteSocket->writeDatagram(mSendReceiveBuffer.data(), mSendReceiveBuffer.size(), mMasterNodeAddress, mMasterNodePort);
-                    sendToMasterNode();
+                    mLocalSocket->writeDatagram(mSendReceiveBuffer.data(), mSendReceiveBuffer.size(), mMasterNodeAddress, mMasterNodePort);
+//                    sendToMasterNode();
 
                     break;
                 case MasterToSlaveMessage::START_TIME_MEAS:
@@ -113,12 +104,4 @@ void MeasurementNode::readPendingDatagrams() {
             }
         }
     }
-}
-
-qint64 MeasurementNode::sendToMasterNode() {
-//    QDataStream(&mSendReceiveBuffer, QIODevice::WriteOnly) << static_cast<quint8>(msg) << byte1;
-
-    mMasterDatagram->setData(mSendReceiveBuffer);
-    DEBUG_PRINT("Sending data to master node: senderAddress=" << mMasterDatagram->senderAddress() << ", senderPort=" << mMasterDatagram->senderPort());
-    return mRemoteSocket->writeDatagram(*mMasterDatagram);
 }
