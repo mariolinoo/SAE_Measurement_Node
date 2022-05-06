@@ -53,7 +53,7 @@ void MeasurementNode::readPendingDatagrams() {
                 continue;
             }
             else {
-                // TODO for production disable this
+#ifdef VERBOSE_DEBUG_PRINTING
                 QString data;
                 QTextStream ss(&data);
                 ss << "0x " << Qt::hex;
@@ -62,6 +62,7 @@ void MeasurementNode::readPendingDatagrams() {
                     ss << static_cast<qint8>(mSendReceiveBuffer.at(i)) << " ";
                 }
                 DEBUG_PRINT("Received (" << lcPendingDatagramSize << "): " << data);
+#endif // VERBOSE_DEBUG_PRINTING
             }
 
             // dispatch the protocol
