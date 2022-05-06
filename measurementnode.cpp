@@ -35,6 +35,8 @@ void MeasurementNode::start() {
     const bool lcClientSocketBindSuccessful = mLocalSocket->bind(QHostAddress::Any, mClientPort);
     Q_ASSERT(lcClientSocketBindSuccessful);
     connect(mLocalSocket.data(), &QUdpSocket::readyRead, this, &MeasurementNode::readPendingDatagrams);
+    // not working with QUdpSocket which is not bound to a HostAddress:Port
+//    connect(mRemoteSocket.data(), &QUdpSocket::readyRead, this, &MeasurementNode::readPendingDatagrams);
 
     // finally say hello to the master
     mSendReceiveBuffer[0] = SlaveToMasterMessage::SlaveToMasterMessage::HELLO_MSG;
@@ -49,6 +51,7 @@ void MeasurementNode::readPendingDatagrams() {
 //    mSendReceiveBuffer[DEFAULT_DATAGRAM_MAX_SIZE-1] = 1; // only for testing, remove it in production
 
     while ( mLocalSocket->hasPendingDatagrams()) {
+        const qint64 lcPendingDatagramSize = mLocalSocket->pendingDatagramSize();
         const qint64 lcRet = mLocalSocket->readDatagram(mSendReceiveBuffer.data(), DEFAULT_DATAGRAM_MAX_SIZE);
         if (lcRet != -1) {
 
@@ -62,11 +65,11 @@ void MeasurementNode::readPendingDatagrams() {
                 QString data;
                 QTextStream ss(&data);
                 ss << "0x " << Qt::hex;
-                for (int i = DEFAULT_DATAGRAM_MAX_SIZE-1; i >= 0; i--) {
+                for (int i = 0; i < DEFAULT_DATAGRAM_MAX_SIZE; i++) {
                     //DEBUG_PRINT("i=" << i << ": " << static_cast<qint8>(mSendReceiveBuffer.at(i)));
                     ss << static_cast<qint8>(mSendReceiveBuffer.at(i)) << " ";
                 }
-                DEBUG_PRINT("Received: " << data);
+                DEBUG_PRINT("Received (" << lcPendingDatagramSize << "): " << data);
             }
 
             // dispatch the protocol
@@ -115,5 +118,7 @@ void MeasurementNode::readPendingDatagrams() {
 qint64 MeasurementNode::sendToMasterNode() {
 //    QDataStream(&mSendReceiveBuffer, QIODevice::WriteOnly) << static_cast<quint8>(msg) << byte1;
 
+    mMasterDatagram->setData(mSendReceiveBuffer);
+    DEBUG_PRINT("Sending data to master node: senderAddress=" << mMasterDatagram->senderAddress() << ", senderPort=" << mMasterDatagram->senderPort());
     return mRemoteSocket->writeDatagram(*mMasterDatagram);
 }
