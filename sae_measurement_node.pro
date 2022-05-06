@@ -6,13 +6,14 @@ CONFIG -= app_bundle
 
 SOURCES += \
     main.cpp \
-    measurementnode.cpp \
-    time_measurement.cpp
+#    time_measurement.cpp \
+    measurementnode.cpp
+
 
 HEADERS += \
     constants.h \
     logging.h \
+#    time_measurement.h \
     measurementnode.h \
-    protocol.h \
-    time_measurement.h
+    protocol.h
     

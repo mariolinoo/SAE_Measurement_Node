@@ -53,7 +53,7 @@ unsigned int TimeMeasurement::measurement()
     return 0;
 }
 
-void Timemeasurement::measurementinterrupt()
+void TimeMeasurement::measurementinterrupt()
 {
     clock_gettime(CLOCK_REALTIME, &cpu_time);
     this->values.end = cpu_time;

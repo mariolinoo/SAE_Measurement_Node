@@ -12,4 +12,6 @@
 #define MASTER_NODE_PORT             7000
 #define MASTER_NODE_IP               "127.0.0.1"
 
+#define NODE_ID                      1
+
 #endif // CONSTANTS_H
