@@ -19,6 +19,9 @@ MeasurementNode::MeasurementNode(QObject *parent)
 
     mSendReceiveBuffer.resize(DEFAULT_DATAGRAM_MAX_SIZE);
 
+    mMasterDatagram.reset(new QNetworkDatagram(mSendReceiveBuffer, mMasterNodeAddress, mMasterNodePort));
+    mMasterDatagram->setSender(QHostAddress(MEASUREMENT_NODE_IP), MEASUREMENT_NODE_PORT);
+
 //    mTimeMeasurement.reset(new TimeMeasurement());
 }
 
@@ -35,7 +38,8 @@ void MeasurementNode::start() {
 
     // finally say hello to the master
     mSendReceiveBuffer[0] = SlaveToMasterMessage::SlaveToMasterMessage::HELLO_MSG;
-    mRemoteSocket->writeDatagram(mSendReceiveBuffer.data(), mSendReceiveBuffer.size(), mMasterNodeAddress, mMasterNodePort);
+//    mRemoteSocket->writeDatagram(mSendReceiveBuffer.data(), mSendReceiveBuffer.size(), mMasterNodeAddress, mMasterNodePort);
+    sendToMasterNode();
 }
 
 void MeasurementNode::readPendingDatagrams() {
@@ -89,7 +93,8 @@ void MeasurementNode::readPendingDatagrams() {
                     // send ack back
                     mSendReceiveBuffer.fill(0, DEFAULT_DATAGRAM_MAX_SIZE);
                     mSendReceiveBuffer[0] = SlaveToMasterMessage::SlaveToMasterMessage::ACK_ROUNDTRIP;
-                    mRemoteSocket->writeDatagram(mSendReceiveBuffer.data(), mSendReceiveBuffer.size(), mMasterNodeAddress, mMasterNodePort);
+//                    mRemoteSocket->writeDatagram(mSendReceiveBuffer.data(), mSendReceiveBuffer.size(), mMasterNodeAddress, mMasterNodePort);
+                    sendToMasterNode();
 
                     break;
                 case MasterToSlaveMessage::START_TIME_MEAS:
@@ -107,8 +112,8 @@ void MeasurementNode::readPendingDatagrams() {
     }
 }
 
-qint64 MeasurementNode::sendToMasterNode(SlaveToMasterMessage::SlaveToMasterMessage msg, quint8 byte1) {
-    QDataStream(&mSendReceiveBuffer, QIODevice::WriteOnly) << static_cast<quint8>(msg) << byte1;
+qint64 MeasurementNode::sendToMasterNode() {
+//    QDataStream(&mSendReceiveBuffer, QIODevice::WriteOnly) << static_cast<quint8>(msg) << byte1;
 
-    return mRemoteSocket->writeDatagram(mSendReceiveBuffer.data(), mSendReceiveBuffer.size(), mMasterNodeAddress, mMasterNodePort);
+    return mRemoteSocket->writeDatagram(*mMasterDatagram);
 }
