@@ -67,7 +67,8 @@ void MeasurementNode::readPendingDatagrams() {
 
             // dispatch the protocol
             // Note: beware of network byte order (big endian) where first byte is at the last index
-            switch (static_cast<int>(mSendReceiveBuffer.at(DEFAULT_DATAGRAM_MAX_SIZE-1))) {
+            // TODO seems to be in first byte from C application (master), but maybe because it only sends 1 byte --> check received length
+            switch (static_cast<int>(mSendReceiveBuffer.at(0))) {
                 case MasterToSlaveMessage::START_ROUNDTRIP_MEAS:
                     DEBUG_PRINT("Start roundtrip measurement message received");
 #if 0
