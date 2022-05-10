@@ -1,11 +1,13 @@
-#include <sys/time.h>   //Time library 
-#include <wiringPi.h>   //Gpio ports 
+#ifndef TIME_MEASUREMENT_H
+#define TIME_MEASUREMENT_H
+
+
+#include <time.h>   //Time library 
+#include <bcm2835.h> //GPIO lib
 
 
 class TimeMeasurement {
     private:
-        //CPU time
-        struct timespec cpu_time;
         //Time delay on the communication
         long long time_delay_comm;
         //Time delay to master cpu
@@ -17,10 +19,9 @@ class TimeMeasurement {
             struct timespec start;
             struct timespec end; 
             long long elapsed;
-            bool    ready_to_calc;
-        }measurement; 
+        }measurement_struct; 
 
-        measurement values;
+        measurement_struct values;
 
         //Interrupt for sensor measurement
         void measurementinterrupt();
@@ -30,13 +31,12 @@ class TimeMeasurement {
         //Initializes all variables and ports
         void init();
 
-        //Calculates time delay to master
-        void timesync_master(unsigned int time_master); //whsl egal?
-
         //Calculates time delay on bus 
-        void timesync_communication(unsigned int measured_delay);
+        void timesync_communication(long long measured_delay);
 
         //Measurment 
-        unsigned int measurement();
+        long long measurement(void);
     
 };
+
+#endif
