@@ -54,7 +54,7 @@ long long TimeMeasurement::measurement()
     return this->values.elapsed;
 }
 
-void Timemeasurement::measurementinterrupt()
+void TimeMeasurement::measurementinterrupt()
 {
     clock_gettime(CLOCK_REALTIME, &cpu_time);
     this->values.end = cpu_time;

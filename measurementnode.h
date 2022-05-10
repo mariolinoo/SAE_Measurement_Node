@@ -8,7 +8,7 @@
 #include "protocol.h"
 
 class QUdpSocket;
-class TimeMeasurement;
+//class TimeMeasurement;
 
 class MeasurementNode : public QObject
 {
@@ -25,14 +25,6 @@ public:
         mMasterNodePort = pPort;
     }
 
-    /**
-     * @brief sendToMasterNode Sends a message to the master node.
-     * @param msg              The message to send.
-     * @param byte1            Byte1 of the message.
-     * @return In case of error this function returns -1 same as QUdpSocket::writeDatagram().
-     */
-    qint64 sendToMasterNode(SlaveToMasterMessage::SlaveToMasterMessage msg, quint8 byte1);
-
 signals:
 
 public slots:
@@ -45,7 +37,6 @@ private:
     Q_DISABLE_COPY(MeasurementNode)
 
     QScopedPointer<QUdpSocket> mLocalSocket;   // for bind, to receive (read) data
-    QScopedPointer<QUdpSocket> mRemoteSocket;  // to write data to remote hosts
 
     quint16 mClientPort;
 
@@ -54,7 +45,7 @@ private:
     QHostAddress mMasterNodeAddress;
     quint16 mMasterNodePort;
 
-    QScopedPointer<TimeMeasurement> mTimeMeasurement;
+//    QScopedPointer<TimeMeasurement> mTimeMeasurement;
 };
 
 #endif // MEASUREMENTNODE_H
