@@ -16,9 +16,8 @@ class TimeMeasurement {
         typedef struct{
             struct timespec start;
             struct timespec end; 
-            unsigned int elapsed;
+            long long elapsed;
             bool    ready_to_calc;
-            bool    done;
         }measurement; 
 
         measurement values;

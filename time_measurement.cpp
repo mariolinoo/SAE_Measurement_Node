@@ -39,7 +39,7 @@ void TimeMeasurement::timesync_communication(long long measured_delay)
     return;
 }
 
-unsigned int TimeMeasurement::measurement()
+long long TimeMeasurement::measurement()
 {
     long long tmp; 
     clock_gettime(CLOCK_REALTIME, &cpu_time);
@@ -49,8 +49,9 @@ unsigned int TimeMeasurement::measurement()
     
     //Measured time calc - prototype
     tmp = (((this->values.start.tv_sec * 1000000000L) + this->values.start.tv_nsec) - this->time_delay_comm);
+    this->values.elapsed = ((this->values.start.tv_sec * 1000000000L) + this->values.start.tv_nsec) - ((this->values.end.tv_sec * 1000000000L) + this->values.end.tv_nsec);
 
-    return 0;
+    return this->values.elapsed;
 }
 
 void Timemeasurement::measurementinterrupt()
