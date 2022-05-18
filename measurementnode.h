@@ -6,6 +6,7 @@
 #include <QHostAddress>
 
 #include "protocol.h"
+#include "time_measurement.h"
 
 class QUdpSocket;
 //class TimeMeasurement;
@@ -41,6 +42,8 @@ private:
     quint16 mClientPort;
 
     QByteArray mSendReceiveBuffer;
+
+    TimeMeasurement sound_measurement;
 
     QHostAddress mMasterNodeAddress;
     quint16 mMasterNodePort;

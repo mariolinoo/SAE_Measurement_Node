@@ -9,8 +9,8 @@
 
 // UDP ports and IP of master node
 #define MEASUREMENT_NODE_PORT        4242
-#define MASTER_NODE_PORT             7000
-#define MASTER_NODE_IP               "127.0.0.1"
+#define MASTER_NODE_PORT             8080
+#define MASTER_NODE_IP               "192.168.1.10"
 
 // The node id to use for communication with the master
 #define NODE_ID                      1

@@ -27,6 +27,8 @@ void MeasurementNode::start() {
     INFO_PRINT("Listening on UDP port " << mClientPort);
     INFO_PRINT("Server connection info: " << mMasterNodeAddress << ":" << mMasterNodePort);
 
+    sound_measurement.init();
+
     const bool lcClientSocketBindSuccessful = mLocalSocket->bind(QHostAddress::Any, mClientPort);
     Q_ASSERT(lcClientSocketBindSuccessful);
     connect(mLocalSocket.data(), &QUdpSocket::readyRead, this, &MeasurementNode::readPendingDatagrams);
@@ -39,6 +41,7 @@ void MeasurementNode::start() {
 void MeasurementNode::readPendingDatagrams() {
 //    unsigned int ts_time_master = 0;
 //    quint32 ts = 0, ts_sec = 0, ts_usec = 0;
+    long int measured_time;
 
 //    mSendReceiveBuffer[DEFAULT_DATAGRAM_MAX_SIZE-1] = 1; // only for testing, remove it in production
 
@@ -96,6 +99,11 @@ void MeasurementNode::readPendingDatagrams() {
                     DEBUG_PRINT("Start Measurement message received");
 
                     // TODO trigger the measurement and sent result back to master
+                    //measured_time = sound_measurement.measurement()/1000;
+                    measured_time = 2000000000;
+                    DEBUG_PRINT("Measurement: " << measured_time);
+                    QDataStream(&mSendReceiveBuffer, QIODevice::WriteOnly) << static_cast<quint8>(SlaveToMasterMessage::TIME_MEA) << static_cast<qint32>(measured_time); 
+                    mLocalSocket->writeDatagram(mSendReceiveBuffer.data(), mSendReceiveBuffer.size(), mMasterNodeAddress, mMasterNodePort);
 //                    mTimeMeasurement->measurement();
 
                     break;

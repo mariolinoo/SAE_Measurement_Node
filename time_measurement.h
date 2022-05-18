@@ -9,16 +9,16 @@
 class TimeMeasurement {
     private:
         //Time delay on the communication
-        long long time_delay_comm;
+        long time_delay_comm;
         //Time delay to master cpu
-        long long time_delay_master; 
+        long time_delay_master; 
         //General indicator
         bool initialized = false; 
         //Measurment
         typedef struct{
             struct timespec start;
             struct timespec end; 
-            long long elapsed;
+            long elapsed;
         }measurement_struct; 
 
         measurement_struct values;
@@ -28,15 +28,12 @@ class TimeMeasurement {
 
     public: 
 
+
         //Initializes all variables and ports
         void init();
 
-        //Calculates time delay on bus 
-        void timesync_communication(long long measured_delay);
-
         //Measurment 
-        long long measurement(void);
+        long measurement(void);
     
 };
-
 #endif
