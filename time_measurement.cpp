@@ -29,26 +29,33 @@ void TimeMeasurement::init()
 }
 
 
-long TimeMeasurement::measurement(void)
+uint32_t TimeMeasurement::measurement(void)
 {
-    long tmp; 
-    struct timespec time;
-    clock_gettime(CLOCK_REALTIME, &time);
-    this->values.start = time; 
-    bcm2835_gpio_hen(PIN);
-    while(1)
+    if (!Debug)
     {
-        if(bcm2835_gpio_eds(PIN))
+        struct timespec time;
+        clock_gettime(CLOCK_REALTIME, &time);
+        this->values.start = time; 
+        bcm2835_gpio_hen(PIN);
+        while(1)
         {
-            measurementinterrupt();
-            bcm2835_gpio_set_eds(PIN);
-            break;
+            if(bcm2835_gpio_eds(PIN))
+            {
+                measurementinterrupt();
+                bcm2835_gpio_set_eds(PIN);
+                break;
+            }
         }
-    }
-    //Measured time calc - prototype
-    this->values.elapsed = ((this->values.start.tv_sec * 1000000000L) + this->values.start.tv_nsec) - ((this->values.end.tv_sec * 1000000000L) + this->values.end.tv_nsec);
+        //Measured time calc - prototype // nano seconfs
+        this->values.elapsed = ((this->values.start.tv_sec * 1000000L) + this->values.start.tv_nsec/1000) - ((this->values.end.tv_sec * 1000000L) + this->values.end.tv_nsec/1000);
 
-    return this->values.elapsed;
+        return this->values.elapsed;
+    }
+    else
+    {
+        uint32_t debug = 0x5555;
+        return 
+    }
 }
 
 void TimeMeasurement::measurementinterrupt()
