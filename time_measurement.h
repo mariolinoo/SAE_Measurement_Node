@@ -1,6 +1,7 @@
 #ifndef TIME_MEASUREMENT_H
 #define TIME_MEASUREMENT_H
 
+#define DEBUG 1u
 
 #include <time.h>   //Time library 
 #include <bcm2835.h> //GPIO lib
@@ -18,7 +19,7 @@ class TimeMeasurement {
         typedef struct{
             struct timespec start;
             struct timespec end; 
-            long elapsed;
+            uint32_t elapsed;
         }measurement_struct; 
 
         measurement_struct values;
@@ -33,7 +34,7 @@ class TimeMeasurement {
         void init();
 
         //Measurment 
-        long measurement(void);
+        uint32_t measurement(void);
     
 };
 #endif
